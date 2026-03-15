@@ -8,11 +8,11 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ImportController extends Controller
 {
-
     public function upload(Request $request)
     {
-
         $files = $request->file('excel');
+
+        $insert = [];
 
         foreach ($files as $file) {
 
@@ -22,13 +22,15 @@ class ImportController extends Controller
 
                 if ($index < 2) continue;
 
-                if ($row[6] == 'Belum dibagging') {
+                if (isset($row[6]) && $row[6] == 'Belum dibagging') {
 
-                    Resi::create([
+                    $insert[] = [
                         'agen' => $row[1],
                         'no_resi' => $row[3],
                         'status_bagging' => $row[6],
-                    ]);
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ];
 
                 }
 
@@ -36,7 +38,10 @@ class ImportController extends Controller
 
         }
 
+        if (!empty($insert)) {
+            Resi::insert($insert);
+        }
+
         return redirect('/hasil');
     }
-
 }
